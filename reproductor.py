@@ -277,14 +277,14 @@ class Reproductor:
 
     
     def detener(self):
-        """Detener la canción y reiniciar la barra de progreso sin perder el archivo cargado"""
+        """Detener la canción, eliminarla de la lista y reiniciar la barra de progreso sin perder el archivo cargado"""
         if self.estado_reproduccion in ["reproduciendo", "pausado"]:
             pygame.mixer.music.stop()  # Detener la reproducción
             self.estado_reproduccion = "detenido"  # Marcar como detenido
-            self.posicion_actual = 0  # Guardar la posición actual (en segundos)
+            self.posicion_actual = 0  # Reiniciar la posición actual (en segundos)
             self.barra_progreso['value'] = 0  # Reiniciar la barra de progreso
-            self.update_progress()  # Actualizar la interfaz
-            
+            self.update_progress()
+
             # Actualizar la etiqueta de duración a 00:00/00:00
             self.lbl_info.config(text="Duración: 00:00 / 00:00")
 
@@ -433,16 +433,20 @@ class Reproductor:
 
     def update_progress(self):
         """Actualizar la barra de progreso y la etiqueta de tiempo."""
+        if self.estado_reproduccion == "detenido":
+            return  # Salir si la música está detenida
+
         for event in pygame.event.get():
             if event.type == pygame.USEREVENT:  # Verificar si la música ha terminado
-                self.cancion_siguiente(None)  # Llamar a la función para reproducir la siguiente canción
+                if self.estado_reproduccion != "detenido":  # Solo avanzar si no está detenido
+                    self.cancion_siguiente(None)  # Llamar a la función para reproducir la siguiente canción
 
         if self.archivo_actual and self.estado_reproduccion != "detenido":
             # Obtener el tiempo actual de reproducción
             if self.estado_reproduccion == "reproduciendo":
                 current_time = pygame.mixer.music.get_pos() / 1000  # Obtener tiempo de reproducción en segundos
             else:
-                current_time = self.posicion_actual  # Usar la posición almacaenada en pausa
+                current_time = self.posicion_actual  # Usar la posición almacenada en pausa
 
             # Obtener la duración total de la canción
             duracion_total = self.obtener_duracion()
@@ -466,17 +470,6 @@ class Reproductor:
                 self.lbl_info.config(
                     text=f"Duración: {minutos_actual:02}:{segundos_actual:02}/{minutos_total:02}:{segundos_total:02}"
                 )
-
-                # Verificar si es la última canción de la lista
-                seleccion = self.lista_canciones.curselection()
-                if seleccion:
-                    indice_actual = seleccion[0]
-                    if indice_actual == self.lista_canciones.size() - 1:  # Si es la última canción
-                        # Condicional para detener la canción si la duración actual y total son iguales
-                        if current_time >= duracion_total:
-                            self.detener()  # Detener la música
-                            self.lbl_info.config(text="Duración: 00:00 / 00:00")  # Reiniciar la etiqueta de duración a 0
-                            self.lista_canciones.selection_clear(0, tk.END)  # Limpiar la selección de la lista
 
         # Llamar a update_progress cada 500 ms, para que se actualice constantemente mientras se reproduce
         if self.estado_reproduccion == "reproduciendo":
