@@ -5,7 +5,7 @@ from tkinter import ttk
 import pygame
 from mutagen.mp3 import MP3
 from mutagen.wave import WAVE
-
+from Tooltip import Tooltip
 
 class Reproductor:
     # Iniciar pygame mixer
@@ -31,6 +31,8 @@ class Reproductor:
         self.ventana.geometry("800x800")
         self.ventana.config(bg="#1C2833")
         self.ventana.resizable(0,0)
+
+        self.ventana_ayuda = None  # Atributo para rastrear la ventana de ayuda
 
         self.ventana.protocol("WM_DELETE_WINDOW", self.on_closing)
         
@@ -85,13 +87,13 @@ class Reproductor:
         frame_botonera.pack()
 
         # Cargar las imágenes de los botones de control
-        self.imagen_reproducir = tk.PhotoImage(file="images/reproducir.png").subsample(4, 4)
-        self.imagen_pausar = tk.PhotoImage(file="images/pausar.png").subsample(4, 4)
-        self.imagen_detener = tk.PhotoImage(file="images/detener.png").subsample(4, 4)
-        self.imagen_retroceder = tk.PhotoImage(file="images/anterior.png").subsample(4, 4)
-        self.imagen_adelantar = tk.PhotoImage(file="images/siquiente.png").subsample(4, 4)
-        self.imagen_siguiente = tk.PhotoImage(file="images/cancion_siquiente.png").subsample(4, 4)
-        self.imagen_anterior = tk.PhotoImage(file="images/cancion_anterior.png").subsample(4, 4)
+        self.imagen_reproducir = tk.PhotoImage(file="imagenes/reproducir.png").subsample(4, 4)
+        self.imagen_pausar = tk.PhotoImage(file="imagenes/pausar.png").subsample(4, 4)
+        self.imagen_detener = tk.PhotoImage(file="imagenes/detener.png").subsample(4, 4)
+        self.imagen_retroceder = tk.PhotoImage(file="imagenes/anterior.png").subsample(4, 4)
+        self.imagen_adelantar = tk.PhotoImage(file="imagenes/siquiente.png").subsample(4, 4)
+        self.imagen_siguiente = tk.PhotoImage(file="imagenes/cancion_siquiente.png").subsample(4, 4)
+        self.imagen_anterior = tk.PhotoImage(file="imagenes/cancion_anterior.png").subsample(4, 4)
 
         # Botones de control
         botones = [
@@ -158,31 +160,38 @@ class Reproductor:
         self.ventana.mainloop()
     def mostrar_ayuda(self):
         """Mostrar una ventana emergente con los atajos de teclado"""
-        ayuda_ventana = tk.Toplevel(self.ventana)
-        ayuda_ventana.title("Atajos de Teclado")
-        ayuda_ventana.geometry("300x300")
-        ayuda_ventana.config(bg="#1C2833")
+        if self.ventana_ayuda is None or not self.ventana_ayuda.winfo_exists():
+            self.ventana_ayuda = tk.Toplevel(self.ventana)
+            self.ventana_ayuda.title("Atajos de Teclado")
+            self.ventana_ayuda.geometry("300x300")
+            self.ventana_ayuda.config(bg="#1C2833")
 
-        # Contenido de la ventana de ayuda
-        texto_ayuda = """
-        Atajos de Teclado:
-        - Reproducir: Espacio
-        - Pausar: p
-        - Detener: s
-        - Avanzar 10s: →
-        - Retroceder 10s: ←
-        - Canción Anterior: ↑
-        - Canción Siguiente: ↓
-        """
-        
-        etiqueta_ayuda = tk.Label(ayuda_ventana, text=texto_ayuda, bg="#1C2833", fg="#ECF0F1", font=("Arial", 12))
-        etiqueta_ayuda.pack(pady=20)
+            # Contenido de la ventana de ayuda
+            texto_ayuda = """
+            Atajos de Teclado:
+            - Reproducir: Espacio
+            - Pausar: p
+            - Detener: s
+            - Avanzar 10s: →
+            - Retroceder 10s: ←
+            - Canción Anterior: ↑
+            - Canción Siguiente: ↓
+            """
+            etiqueta_ayuda = tk.Label(self.ventana_ayuda, text=texto_ayuda, bg="#1C2833", fg="#ECF0F1", font=("Arial", 12))
 
-        # Botón para cerrar la ventana de ayuda
-        btn_cerrar = tk.Button(
-            ayuda_ventana, text="Cerrar", command=ayuda_ventana.destroy, width=15, bg="#E74C3C", fg="white", font=("Arial", 10, "bold"), bd=0, relief="flat"
-        )
-        btn_cerrar.pack(pady=10)
+            etiqueta_ayuda.pack(pady=20)
+
+            # Botón para cerrar la ventana de ayuda
+            btn_cerrar = tk.Button(
+                self.ventana_ayuda, text="Cerrar", command=self.cerrar_ventana_ayuda, width=15, bg="#E74C3C", fg="white", font=("Arial", 10, "bold"), bd=0, relief="flat"
+            )
+            btn_cerrar.pack(pady=10)
+
+    def cerrar_ventana_ayuda(self):
+        """Cerrar la ventana de ayuda."""
+        if self.ventana_ayuda is not None:
+            self.ventana_ayuda.destroy()  # Cerrar la ventana de ayuda
+            self.ventana_ayuda = None  # Restablecer el atributo a None
 
     def bind_teclas(self):
         """Enlazar las teclas para los atajos de teclado"""
@@ -483,3 +492,4 @@ class Reproductor:
 
 if __name__ == "__main__":
     Reproductor()
+    
