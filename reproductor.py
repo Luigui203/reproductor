@@ -278,7 +278,7 @@ class Reproductor:
     
     def detener(self):
         """Detener la canción y reiniciar la barra de progreso sin perder el archivo cargado"""
-        if self.estado_reproduccion == "reproduciendo" or self.estado_reproduccion == "pausado":
+        if self.estado_reproduccion in ["reproduciendo", "pausado"]:
             pygame.mixer.music.stop()  # Detener la reproducción
             self.estado_reproduccion = "detenido"  # Marcar como detenido
             self.posicion_actual = 0  # Guardar la posición actual (en segundos)
@@ -286,7 +286,7 @@ class Reproductor:
             self.update_progress()  # Actualizar la interfaz
             
             # Actualizar la etiqueta de duración a 00:00/00:00
-            self.lbl_info.config(text="Duración: 00:00/00:00")
+            self.lbl_info.config(text="Duración: 00:00 / 00:00")
 
     
     def avanzar_10_segundos(self, event=None):
